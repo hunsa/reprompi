@@ -4,25 +4,28 @@
 ## Introduction
 
 The ReproMPI Benchmark is a tool designed to accurately measure the
-run-time of MPI blocking collective operations. It provides multiple
-process synchronization methods and a flexible mechanism for
-predicting the number of measurements that are sufficient to obtain
-statistically sound results.
+run-time of MPI blocking collective operations.
 
 # References 
 
 1. Sascha Hunold, Alexandra Carpen-Amarie:
    On the Impact of Synchronizing Clocks and Processes on Benchmarking MPI Collectives. EuroMPI 2015: 8:1-8:10
+   https://doi.org/10.1145/2802658.2802662
 2. Sascha Hunold, Alexandra Carpen-Amarie, Jesper Larsson Träff:
    Reproducible MPI Micro-Benchmarking Isn't As Easy As You Think. EuroMPI/ASIA 2014: 69
+   https://doi.org/10.1145/2642769.2642785
 3. Sascha Hunold, Alexandra Carpen-Amarie:
    Reproducible MPI Benchmarking is Still Not as Easy as You Think. IEEE Trans. Parallel Distributed Syst. 27(12): 3617-3630 (2016)
+   https://doi.org/10.1109/TPDS.2016.2539167
 4. Sascha Hunold, Alexandra Carpen-Amarie:
    Hierarchical Clock Synchronization in MPI. CLUSTER 2018: 325-336
+   https://doi.org/10.1109/CLUSTER.2018.00050
 5. Sascha Hunold, Alexandra Carpen-Amarie:
    Autotuning MPI Collectives using Performance Guidelines. HPC Asia 2018: 64-74
+   https://doi.org/10.1145/3149457.3149461
 6. Joseph Schuchart, Sascha Hunold, George Bosilca:
    Synchronizing MPI Processes in Space and Time. EuroMPI 2023: 7:1-7:11
+   https://doi.org/10.1145/3615318.3615325
    
 ## Components
 
@@ -33,15 +36,15 @@ statistically sound results.
 
 - Prerequisites
   - an MPI library 
-  - CMake (version >= 3.0)  
+  - CMake (version >= 3.22)  
   - GSL libraries 
 
 ## Basic installation
 
 ```
   cd $BENCHMARK_PATH
-  ./cmake .
-  make
+  cmake -B build 
+  cmake --build build
 ```
 
 For specific configuration options check the *Benchmark Configuration* section.
@@ -123,20 +126,6 @@ mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather
   - `MPI_Scan`
   - `MPI_Scatter`
 
-### Mockup Functions of Various MPI Collectives
-
-| **MPI_Allgather** | **MPI_Allreduce**            | **MPI_Alltoall** | **MPI_Bcast**     | **MPI_Gather** | **MPI_Reduce**            | **MPI_Reduce_scatter_block** | **MPI_Scan**       | **MPI_Scatter** |
-|-------------------|------------------------------|------------------|-------------------|----------------|---------------------------|------------------------------|--------------------|-----------------|
-| Default           | Default                      | Default          | Default           | Default        | Default                   | Default                      | Default            | Default         |
-| Allgatherv        | Reduce+Bcast                 | Alltoallv        | Allgatherv        | Allgather      | Allreduce                 | Reduce+Scatter               | Exscan+Reducelocal | Bcast           |
-| Allreduce         | Reducescatterblock+Allgather | Lane             | Scatter+Allgather | Gatherv        | Reducescatterblock+Gather | Reducescatter                | Lane               | Scatterv        |
-| Alltoall          | Reducescatter+Allgatherv     |                  | Lane              | Reduce         | Reducescatter+Gatherv     | Allreduce                    | Hier               | Lane            |
-| Gather+Bcast      | Lane                         |                  | Hier              | Lane           | Reducescatter             | Hier                         |                    | Hier            |
-| Lane              | Hier                         |                  |                   | Hier           | Lane                      | Lane                         |                    |                 |
-| Lane Zero         |                              |                  |                   |                | Hier                      |                              |                    |                 |
-| Hier                          |                    |                 |
-
-    
 
 ## Process Synchronization Methods
 
@@ -144,7 +133,7 @@ mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather
 This is the default synchronization method enabled for the benchmark.
 
 ### Dissemination Barrier
-To benchmark collective operations acorss multiple MPI libraries using
+To benchmark collective operations across multiple MPI libraries using
 the same barrier implementation, the benchmark provides a
 dissemination barrier that can replace the default MPI_Barrier to
 synchronize processes.
