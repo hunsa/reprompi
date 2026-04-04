@@ -26,7 +26,6 @@
 static const int OUTPUT_ROOT_PROC = 0;
 
 static void print_initial_settings(const reprompib_options_t* opts, const reprompib_common_options_t* common_opts,
-    //const reprompib_dictionary_t* dict,
                                    const reprompib_bench_print_info_t* print_info) {
   int my_rank, np;
 

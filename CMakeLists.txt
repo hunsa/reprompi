@@ -137,7 +137,7 @@ set(CLOCKSYNC_HEADER_DIR ${SRC_DIR})
 FetchContent_Declare(
         MPITS
         GIT_REPOSITORY https://github.com/hunsa/mpi-time-sync.git
-        GIT_TAG main)
+        GIT_TAG cli_params)
 
 FetchContent_MakeAvailable(MPITS)
 

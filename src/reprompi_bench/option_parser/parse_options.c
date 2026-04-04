@@ -208,8 +208,7 @@ void reprompib_print_benchmark_help(void) {
         printf("\n          mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,512,1024 --nrep=5\n");
         printf("\n          mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,512,1024 --nrep=5 --clock-sync=HCA --proc-sync=window --window-size=100 --runtime-type=global\n");
         printf("\n          mpirun -np 4 ./bin/mpibenchmark --window-size=100 --calls-list=MPI_Bcast --msize-interval=min=1,max=8,step=1 --nrep=5\n");
-        printf("\n          mpirun -np 4 ./bin/mpibenchmark --window-size=100 --calls-list=MPI_Bcast --msizes-list=1024 --nrep=5 --fitpoints=10 --exchanges=20\n");
-        printf("\n          mpirun -np 4 ./bin/mpibenchmark --window-size=100 --calls-list=MPI_Bcast --msizes-list=1024 --nrep=5 --params=p1:1,p2:aaa,p3:34\n");
+        printf("\n          mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=1024 --nrep=5 --clock-sync=HCA --proc-sync=roundtime --runtime-type=global\n");
         printf("\n          mpirun -np 4 ./bin/mpibenchmark --calls-list=Sendrecv --msizes-list=10 --pingpong-ranks=0,3 --nrep=5 --summary \n");
 
         printf("\n\n");

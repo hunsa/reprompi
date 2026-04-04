@@ -39,14 +39,6 @@ enum{
   REPROMPI_ARGS_SYNC_TYPE = 1
 };
 
-reprompib_dictionary_t* get_global_param_store() {
-  if( params_dict_initialized == 0 ) {
-    reprompib_init_dictionary(&params_dict, HASHTABLE_SIZE);
-    params_dict_initialized = 1;
-  }
-  return &params_dict;
-}
-
 void parse_sync_options(int argc, char **argv, const char* argument_name,
     sync_module_info_t* opts_p) {
     int c;
