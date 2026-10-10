@@ -41,60 +41,25 @@ double WilcoxonMannWhitney::get_z_value() {
     ranks.push_back({*iter, 2});
   }
 
-  std::vector<double> bounded_ranks;
-  StatisticsUtils<double> statisticsUtils;
   std::sort(ranks.begin(), ranks.end());
 
-  // add first rank if not bound
-  if (ranks[1].runtime != ranks[2].runtime) {
-    if (ranks[1].sample_id == 1) {
-      sample_1_rank_sum += 1;
-    } else {
-      sample_2_rank_sum += 1;
+  // assign 1-based ranks; tied runtimes share the average of their ranks
+  const size_t N = ranks.size();
+  size_t i = 0;
+  while (i < N) {
+    size_t j = i;
+    while (j + 1 < N && ranks[j + 1].runtime == ranks[i].runtime) {
+      ++j;
     }
-  }
-
-  for (size_t rank = 2; rank <= ranks.size(); rank++) {
-    // two values share the same rank
-    if (ranks[rank - 1].runtime == ranks[rank].runtime) {
-      if (bounded_ranks.empty()) {
-        bounded_ranks.push_back(rank - 1);
-      }
-      bounded_ranks.push_back(rank);
-    } else {  // value is different from previous
-      if (!bounded_ranks.empty()) {  // but previous values shared the same rank
-        double mean_bounded_ranks = statisticsUtils.mean(bounded_ranks);
-        for (auto iter = bounded_ranks.begin(); iter != bounded_ranks.end(); ++iter) {
-          if (ranks[*iter].sample_id == 1) {
-            sample_1_rank_sum += mean_bounded_ranks;
-          } else {
-            sample_2_rank_sum += mean_bounded_ranks;
-          }
-        }
-        bounded_ranks.clear();
-      }
-    }
-
-    if (ranks[rank - 1].runtime != ranks[rank].runtime
-        && ranks[rank + 1].runtime != ranks[rank].runtime) {
-      if (ranks[rank].sample_id == 1) {
-        sample_1_rank_sum += rank;
+    double mean_rank = (i + 1 + j + 1) / 2.0;
+    for (size_t k = i; k <= j; ++k) {
+      if (ranks[k].sample_id == 1) {
+        sample_1_rank_sum += mean_rank;
       } else {
-        sample_2_rank_sum += rank;
+        sample_2_rank_sum += mean_rank;
       }
     }
-  }
-
-  if (!bounded_ranks.empty()) {
-    double mean_bounded_ranks = statisticsUtils.mean(bounded_ranks);
-    for (size_t i = 0; i < bounded_ranks.size(); ++i) {
-      if (ranks[bounded_ranks[i]].sample_id == 1) {
-        sample_1_rank_sum += mean_bounded_ranks;
-      } else {
-        sample_2_rank_sum += mean_bounded_ranks;
-      }
-    }
-    bounded_ranks.clear();
+    i = j + 1;
   }
 
   // assert that all ranks where assigned
@@ -119,7 +84,7 @@ double WilcoxonMannWhitney::get_shared_rank_deviation(int shared_rank_count) {
 }
 
 double WilcoxonMannWhitney::get_expected_value() {
-  return sample_1.size() * sample_2.size() / 2;
+  return static_cast<double>(sample_1.size()) * sample_2.size() / 2;
 }
 
 bool WilcoxonMannWhitney::get_violation() {
