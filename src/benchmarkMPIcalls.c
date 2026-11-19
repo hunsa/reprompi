@@ -31,7 +31,6 @@
 #include "reprompi_bench/misc.h"
 //#include "reprompi_bench/sync/clock_sync/synchronization.h"
 #include "reprompi_bench/sync/process_sync/process_synchronization.h"
-#include "reprompi_bench/sync/time_measurement.h"
 #include "benchmark_job.h"
 #include "reprompi_bench/option_parser/option_parser_helpers.h"
 #include "reprompi_bench/option_parser/parse_options.h"
@@ -59,8 +58,6 @@ int main(int argc, char* argv[]) {
 
   reprompib_register_proc_sync_modules();
   reprompib_register_caching_modules();
-
-  REPROMPI_init_timer();
 
   run_collective(argc, argv, &cs);
 

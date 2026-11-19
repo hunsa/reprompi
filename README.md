@@ -1,32 +1,25 @@
-# ReproMPI Benchmark (Development Version)
-
+# ReproMPI Benchmark
 
 ## Introduction
 
 The ReproMPI Benchmark is a tool designed to accurately measure the
-run-time of MPI blocking collective operations.
+run-time of **MPI blocking collective** operations such as `MPI_Bcast`,
+`MPI_Allgather`, `MPI_Reduce`, etc. 
 
 # References 
 
 1. Sascha Hunold, Alexandra Carpen-Amarie:
-   On the Impact of Synchronizing Clocks and Processes on Benchmarking MPI Collectives. EuroMPI 2015: 8:1-8:10
-   https://doi.org/10.1145/2802658.2802662
+   On the Impact of Synchronizing Clocks and Processes on Benchmarking MPI Collectives. EuroMPI 2015: 8:1-8:10. https://doi.org/10.1145/2802658.2802662
 2. Sascha Hunold, Alexandra Carpen-Amarie, Jesper Larsson Träff:
-   Reproducible MPI Micro-Benchmarking Isn't As Easy As You Think. EuroMPI/ASIA 2014: 69
-   https://doi.org/10.1145/2642769.2642785
+   Reproducible MPI Micro-Benchmarking Isn't As Easy As You Think. EuroMPI/ASIA 2014: 69. https://doi.org/10.1145/2642769.2642785
 3. Sascha Hunold, Alexandra Carpen-Amarie:
-   Reproducible MPI Benchmarking is Still Not as Easy as You Think. IEEE Trans. Parallel Distributed Syst. 27(12): 3617-3630 (2016)
-   https://doi.org/10.1109/TPDS.2016.2539167
+   Reproducible MPI Benchmarking is Still Not as Easy as You Think. IEEE Trans. Parallel Distributed Syst. 27(12): 3617-3630 (2016). https://doi.org/10.1109/TPDS.2016.2539167
 4. Sascha Hunold, Alexandra Carpen-Amarie:
-   Hierarchical Clock Synchronization in MPI. CLUSTER 2018: 325-336
-   https://doi.org/10.1109/CLUSTER.2018.00050
+   Hierarchical Clock Synchronization in MPI. CLUSTER 2018: 325-336. https://doi.org/10.1109/CLUSTER.2018.00050
 5. Sascha Hunold, Alexandra Carpen-Amarie:
-   Autotuning MPI Collectives using Performance Guidelines. HPC Asia 2018: 64-74
-   https://doi.org/10.1145/3149457.3149461
+   Autotuning MPI Collectives using Performance Guidelines. HPC Asia 2018: 64-74. https://doi.org/10.1145/3149457.3149461
 6. Joseph Schuchart, Sascha Hunold, George Bosilca:
-   Synchronizing MPI Processes in Space and Time. EuroMPI 2023: 7:1-7:11
-   https://doi.org/10.1145/3615318.3615325
-   
+   Synchronizing MPI Processes in Space and Time. EuroMPI 2023: 7:1-7:11. https://doi.org/10.   
 ## Components
 
 - `mpibenchmark`: actual MPI benchmark for collectives
@@ -34,17 +27,19 @@ run-time of MPI blocking collective operations.
 
 ## Installation
 
-- Prerequisites
-  - an MPI library 
-  - CMake (version >= 3.22)  
-  - GSL libraries 
+For installing `pgchecker`, check the [README](https://github.com/hunsa/reprompi/tree/main/src/pgcheck/README.md)
+
+Prerequisites for installing the ReproMPI benchmark:
+- an MPI library 
+- CMake (version >= 3.22)  
+- GSL libraries 
 
 ## Basic installation
 
 ```
-  cd $BENCHMARK_PATH
-  cmake -B build 
-  cmake --build build
+  git clone https://github.com/hunsa/reprompi-dev
+  cd reprompi-dev
+  cmake -B build
 ```
 
 For specific configuration options check the *Benchmark Configuration* section.
@@ -64,38 +59,37 @@ mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather
              --msizes-list=8,1024,2048  --nrep=10
 ```
 
-
-
 ## Command-line Options
 
 ### Common Options
 
   - `-h` print help
   - `-v` print run-times measured for each process
-  - `--msizes-list`<values>= list of comma-separated message sizes in
+  - `--msizes-list=<values>` list of comma-separated message sizes in
     Bytes, e.g., `--msizes-list=10,1024`
   - `--msize-interval=min=<min>,max=<max>,step=<step>` list of power
     of 2 message sizes as an interval between $2^{min}$ and $2^{max}$,
-    with $2^{step}$ distance between values, e.g., 
+    with $2^{step}$ distance between values, e.g.,
     `--msize-interval=min=1,max=4,step=1`
   - `--calls-list=<args>` list of comma-separated MPI calls to be
     benchmarked, e.g., `--calls-list=MPI_Bcast,MPI_Allgather`
-  - `--root-proc=<process_id>` root node for collective operations     
+  - `--root-proc=<process_id>` root node for collective operations
   - `--operation=<mpi_op>` MPI operation applied by collective
     operations (where applicable), e.g., `--operation=MPI_BOR`.
-    
-    Supported operations: MPI_BOR, MPI_BAND, MPI_LOR, MPI_LAND,
-    MPI_MIN, MPI_MAX, MPI_SUM, MPI_PROD 
+
+    Supported operations: `MPI_BOR`, `MPI_BAND`, `MPI_LOR`, `MPI_LAND`,
+    `MPI_MIN`, `MPI_MAX`, `MPI_SUM`, `MPI_PROD`
   - `--datatype=<mpi_type>` MPI datatype used by collective
     operations, e.g., `--datatype=MPI_CHAR`.
 
-    Supported datatypes: `MPI_CHAR`, `MPI_INT`, `MPI_FLOAT`, `MPI_DOUBLE`
+    Supported datatypes: `MPI_BYTE`, `MPI_CHAR`, `MPI_INT`, `MPI_FLOAT`, `MPI_DOUBLE`
   - `--shuffle-jobs` shuffle experiments before running the benchmark
-  - `--params=k1:v1,k2:v2` list of comma-separated =key:value= pairs
-    to be printed in the benchmark output.
   - `-f | --input-file=<path>` input file containing the list of
     benchmarking jobs (tuples of MPI function, message size, number of
     repetitions). It replaces all the other common options.
+  - `--output-file=<path>` path to the output file where results are written
+  - `--pingpong-ranks=<rank1>,<rank2>` two comma-separated process ranks
+    used for ping-pong operations
   
   
 ### Options Related to the Window-based Synchronization
@@ -129,82 +123,62 @@ mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather
 
 ## Process Synchronization Methods
 
-### MPI_Barrier
-This is the default synchronization method enabled for the benchmark.
+The synchronization method is selected via `--proc-sync=<method>`.
 
-### Dissemination Barrier
-To benchmark collective operations across multiple MPI libraries using
-the same barrier implementation, the benchmark provides a
-dissemination barrier that can replace the default MPI_Barrier to
-synchronize processes.
+### `MPI_Barrier`
+The default synchronization method. Uses `MPI_Barrier` to synchronize
+processes before each measurement.
 
-To enable the dissemination barrier, the following flag has to be set
-before compiling the benchmark (e.g., using the =ccmake= command).
+### `Double_MPI_Barrier`
+Calls `MPI_Barrier` twice before each measurement for more robust
+synchronization.
 
-```
-ENABLE_BENCHMARK_BARRIER
-```
+### `dissem_barrier`
+A dissemination barrier implementation that replaces `MPI_Barrier` to
+synchronize processes independent of the underlying MPI library.
+The dissemination barrier is always compiled in.
 
-Both barrier-based synchronization methods can alternatively use a
-double barrier before each measurement.
+### `window`
+Window-based process synchronization. Uses global clocks (obtained via
+the clock synchronization library) to align processes within a time
+window before each measurement. The window size is set with
+`--window-size=<microseconds>`.
 
-```
-ENABLE_DOUBLE_BARRIER
-```
+### `roundtime`
+Round-time synchronization. Uses global clocks to synchronize processes
+based on measured round-trip times. Requires a clock synchronization
+method (configured via [mpi-time-sync](https://github.com/hunsa/mpi-time-sync/) options). The runtime type can be set to `global` or `local`.
 
+Before each measurement, the root broadcasts a target start time derived from the
+measured Bcast run-time, and all processes busy-wait until that global time is reached.
 
-### Window-based Synchronization
+Parameters:
+  - `--rt-bench-time-ms=<ms>` time limit in milliseconds for measurements of a given
+    message size; once the elapsed time exceeds this limit, measurements for that
+    message size are stopped
+  - `--rt-barrier-count=<bytes>` message size threshold in bytes above which the
+    synchronization switches from clock-based to `MPI_Barrier` (default: never switch)
+  - `--bcast-nrep=<n>` number of Bcast repetitions used to estimate the Bcast run-time
+    (default: 10)
+  - `--bcast-mult=<factor>` multiplier applied to the estimated Bcast run-time to compute
+    the target start time (must be >= 1.0, default: 3)
+  - `--bcast-meas=<mean|median|max>` statistic used to summarize the measured Bcast
+    run-times across processes (default: mean)
 
-The ReproMPI benchmark implements a window-based process
-synchronization mechanism, which estimates the clock offset/drift of
-each process relative to a reference process and then uses the
-obtained global clocks to synchronize processes before each
-measurement and to compute run-times.
-
+### `None`
+No process synchronization. Processes start the measurement
+independently without any barrier or clock-based alignment.
 
 ### Timing procedure
-  
-  The MPI operation run-time is computed in a different manner
-  depending on the selected clock synchronization method. If global
-  clocks are available, the run-times are computed as the difference
-  between the largest exit time and the first start time among all
-  processes.
 
-  If a barrier-based synchronization is used, the run-time of an MPI
-  call is computed as the largest local run-time across all processes.
+The MPI operation run-time is computed differently depending on the
+synchronization method:
 
-  However, the timing proceduce that relies on global clocks can be
-  used in combination with a barrier-based synchronization when the
-  following flag is enabled:
-
-
-### Clock resolution
-
-The =MPI_Wtime= cll is used by default to obtain the current time.
-To obtain accurate measurements of short time intervals, the benchmark
-can rely on the high resolution =RDTSC/RDTSCP= instructions (if they are
-available on the test machines) by setting on of the following flags:
-```
-ENABLE_RDTSC
-ENABLE_RDTSCP
-```
-
-Additionally, setting the clock frequency of the CPU is required to
-obtain accurate measurements:
-```
-FREQUENCY_MHZ                    2300
-```
-
-The clock frequency can also be automatically estimated (as done by
-the NetGauge tool) by enabling the following variable:
-```
-CALIBRATE_RDTSC
-```
-
-However, this method reduces the results accuracy and we advise to
-manually set the highest CPU frequency instead. More details about
-the usage of =RDTSC=-based timers can be found in our research
-report.
+- With global clocks (`window`, `roundtime`): run-time is computed as
+  the difference between the largest exit time and the first start time
+  across all processes (`--runtime-type=global`).
+- With barrier-based synchronization: run-time is the largest local
+  run-time across all processes (`--runtime-type=local`).
 
 ## List of Compilation Flags
 
@@ -212,36 +186,33 @@ This is the full list of compilation flags that can be used to control
 all the previously detailed configuration parameters.
 
 ```
- CALIBRATE_RDTSC                  OFF   
- COMPILE_BENCH_TESTS              OFF                 
- COMPILE_SANITY_CHECK_TESTS       OFF               
- ENABLE_BENCHMARK_BARRIER         OFF             
- ENABLE_DOUBLE_BARRIER            OFF             
- ENABLE_GLOBAL_TIMES              OFF             
- ENABLE_LOGP_SYNC                 OFF             
- ENABLE_RDTSC                     OFF             
- ENABLE_RDTSCP                    OFF           
- ENABLE_WINDOWSYNC_HCA            OFF            
- ENABLE_WINDOWSYNC_JK             OFF        
- ENABLE_WINDOWSYNC_SK             OFF      
- FREQUENCY_MHZ                    2300    
+ ENABLE_BENCH_TESTS               OFF
+ ENABLE_DEBUGGING                 OFF
+ ENABLE_DOUBLE_BARRIER            OFF
+ ENABLE_GETTIME_MONOTONIC         OFF
+ ENABLE_GETTIME_REALTIME          OFF
+ ENABLE_LOGGING                   OFF
+ ENABLE_PGCHECKER                 OFF
+ ENABLE_SANITY_CHECK_CLOCK        OFF
+ SET_BUFFER_ALIGNMENT
+ SET_PRINT_MSIZES_BYTES           OFF
 ```
+
+- `ENABLE_SANITY_CHECK_CLOCK`: enable sanity checks for the clock synchronization
+
+- `ENABLE_BENCH_TESTS`: enable the compilation of benchmark tests (e.g., for testing the dictionary implementation)
+
+- `ENABLE_DEBUGGING`: adds the `-g` compiler flag to include debug symbols in the binary
+
+- `ENABLE_LOGGING`: enable logging output
+
+- `ENABLE_PGCHECKER`: enable the performance guidelines checker component
+
+- `SET_BUFFER_ALIGNMENT`: set the buffer alignment in bytes for collective operations. Typically, use
+the cache line size of the CPU, e.g., 64 bytes for x86-64 architectures.
+
+- `SET_PRINT_MSIZES_BYTES`: print message sizes in bytes in the benchmark output. By default, ReproMPI print the count of MPI datatypes used by collective operations.
 
 ## Clock Synchronization Algorithms
 
-### HCA [1]
-
-### HCA2 [1]
-
-### HCA3 [4]
-
-### Topo1 [4]
-
-### Topo2 [4]
-
-- two-level hierarchical clock-sync
-  - top level for sync between nodes
-  - bottom level on compute node
-- default
-  - top: HCA3
-  - bottom: ClockPropagation
+The ReproMPI benchmark uses the [mpi-time-sync](https://github.com/hunsa/mpi-time-sync/) library to synchronize processes and to obtain global clocks. Clock synchronization options (e.g., algorithm selection, number of ping-pongs) are documented in the mpi-time-sync repository.

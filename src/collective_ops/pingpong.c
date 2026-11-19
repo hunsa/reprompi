@@ -85,7 +85,8 @@ inline void execute_pingpong_Isend_Recv(collective_params_t* params) {
 // MPI_Isend + MPI_Irecv
 inline void execute_pingpong_Isend_Irecv(collective_params_t* params) {
   int src_rank, dst_rank;
-  const int nreqs = 2;
+  //const int nreqs = 2;
+  enum { nreqs = 2 };
   int recv_rank;
   int flag = 0;
   MPI_Request reqs[nreqs];

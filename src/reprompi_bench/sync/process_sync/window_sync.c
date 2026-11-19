@@ -30,7 +30,6 @@
 #include <mpi.h>
 #include "mpits.h"
 #include "reprompi_bench/misc.h"
-#include "reprompi_bench/sync/time_measurement.h"
 #include "reprompi_bench/sync/process_sync/process_synchronization.h"
 //#include "reprompi_bench/sync/clock_sync/synchronization.h"
 
@@ -147,7 +146,7 @@ static void window_init_sync_round(void) {
   if( my_rank == master_rank ) {
     // we need a normalized time to use across processes as a start window
     // (the local time on the master rank needs to be normalized to work as a reference time)
-    start_sync = clock_sync_mod->get_global_time(REPROMPI_get_time()) + parameters.wait_time_sec;
+    start_sync = clock_sync_mod->get_global_time(MPITS_get_time()) + parameters.wait_time_sec;
    // printf("start=%20.12f wait=%f win=%f\n", start_sync, parameters.wait_time_sec, parameters.window_size_sec);
 
   }
@@ -162,7 +161,7 @@ static void window_start_synchronization(MPI_Comm comm)
 
     while(1) {
         //global_time = hca_get_normalized_time(hca_get_adjusted_time());
-        global_time = clock_sync_mod->get_global_time(REPROMPI_get_time());
+        global_time = clock_sync_mod->get_global_time(MPITS_get_time());
         if( is_first < 10 ) {
           //printf("global=%20.12f \n", global_time);
           //sleep(1);
@@ -182,7 +181,7 @@ static int window_stop_synchronization(MPI_Comm comm)
 {
     double global_time;
    // global_time = hca_get_normalized_time(hca_get_adjusted_time());
-    global_time = clock_sync_mod->get_global_time(REPROMPI_get_time());
+    global_time = clock_sync_mod->get_global_time(MPITS_get_time());
 
 
     if( global_time > start_sync + parameters.window_size_sec ) {

@@ -28,7 +28,6 @@
 #include "mpi.h"
 
 //#include "reprompi_bench/sync/clock_sync/synchronization.h"
-#include "reprompi_bench/sync/time_measurement.h"
 #include "reprompi_bench/option_parser/parse_common_options.h"
 #include "reprompi_bench/option_parser/parse_timing_options.h"
 #include "collective_ops/collectives.h"
@@ -80,11 +79,9 @@ void print_common_settings_to_file(FILE* f, const reprompib_bench_print_info_t* 
     }
 
     if (my_rank == OUTPUT_ROOT_PROC) {
-      // reprompib_print_dictionary(dict, f);
 
       fprintf(f, "#@reproMPIcommitSHA1=%s\n", git_commit);
       fprintf(f, "#@nprocs=%d\n", np);
-      print_time_parameters(f);
       print_info->clock_sync->print_sync_info(f);
       print_info->proc_sync->print_sync_info(f);
     }
@@ -133,14 +130,14 @@ static void print_benchmark_common_settings_to_file(FILE* f, const reprompib_ben
         if (opts->pingpong_ranks[0] >=0 && opts->pingpong_ranks[1] >=0) {
           fprintf(f, "#@pingpong_ranks=%d,%d\n", opts->pingpong_ranks[0], opts->pingpong_ranks[1]);
         }
-        print_common_settings_to_file(f, print_info);//, dict);
+        print_common_settings_to_file(f, print_info);
         fprintf(f, "#@runtime_type=%s\n", reprompib_get_timing_method_name(print_info->timing_method));
     }
 }
 
 
 void print_common_settings(const reprompib_bench_print_info_t* print_info,
-    const reprompib_common_options_t* opts) { //, const reprompib_dictionary_t* dict) {
+    const reprompib_common_options_t* opts) { 
     FILE* f = stdout;
     int my_rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);

@@ -32,7 +32,6 @@
 #include <gsl/gsl_sort.h>
 
 #include "reprompi_bench/misc.h"
-#include "reprompi_bench/sync/time_measurement.h"
 #include "reprompi_bench/sync/process_sync/process_synchronization.h"
 #include "reprompi_bench/sync/process_sync/reprompi_collectives.h"
 //#include "reprompi_bench/sync/clock_sync/synchronization.h"
@@ -111,7 +110,7 @@ void roundtimesync_parse_options(int argc, char **argv, reprompi_roundtime_sync_
 
 
 static void roundtimesync_init_sync_round(void) {
-  job_start_time     = REPROMPI_get_time();
+  job_start_time     = MPITS_get_time();
   stop_flag          = 0; // all are running
   invalid            = REPROMPI_CORRECT_MEASUREMENT;
 }
@@ -132,7 +131,7 @@ static void roundtimesync_start_synchronization(MPI_Comm comm) {
 
     PMPI_Barrier(comm);
     if (my_rank == master_rank) {
-      start_sync = REPROMPI_get_time() + bcast_runtime * bcast_parameters.bcast_multiplier;
+      start_sync = MPITS_get_time() + bcast_runtime * bcast_parameters.bcast_multiplier;
     }
     ReproMPI_Bcast(&start_sync, 1, MPI_DOUBLE, master_rank, comm);
 
@@ -142,7 +141,7 @@ static void roundtimesync_start_synchronization(MPI_Comm comm) {
 #endif
 
     while (1) {
-      global_time = clock_sync_mod->get_global_time(REPROMPI_get_time());
+      global_time = clock_sync_mod->get_global_time(MPITS_get_time());
 
       if (global_time >= start_sync) {
         if (is_first == 1) {
@@ -163,7 +162,7 @@ static int roundtimesync_stop_synchronization(MPI_Comm comm) {
     double current_runtime = 0;
     int packet[2];
 
-    current_runtime = REPROMPI_get_time() - job_start_time;
+    current_runtime = MPITS_get_time() - job_start_time;
     if (current_runtime >= roundtime_parameters.time_slot) {
       // stop job
       stop_flag = 1; // someone is raising flag
