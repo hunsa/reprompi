@@ -98,6 +98,7 @@ mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather \
 ### Options Related to the Window-based Synchronization
 
   - `--window-size=<win>` window size in microseconds for Window-based synchronization
+  - `--wait-time=<us>` time in microseconds to wait before the first window starts
 
 
 ### Specific Options for the ReproMPI Benchmark
@@ -127,40 +128,90 @@ mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather \
 ## Process Synchronization Methods
 
 The synchronization method is selected via `--proc-sync=<method>`.
+Available methods: `MPI_Barrier` (default), `Double_MPI_Barrier`, `dissem_barrier`,
+`window`, `roundtime`, `None`.
 
 ### `MPI_Barrier`
 The default synchronization method. Uses `MPI_Barrier` to synchronize
 processes before each measurement.
 
+```
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=MPI_Barrier
+```
+
 ### `Double_MPI_Barrier`
 Calls `MPI_Barrier` twice before each measurement for more robust
 synchronization.
+
+```
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=Double_MPI_Barrier
+```
 
 ### `dissem_barrier`
 A dissemination barrier implementation that replaces `MPI_Barrier` to
 synchronize processes independent of the underlying MPI library.
 The dissemination barrier is always compiled in.
 
+```
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=dissem_barrier
+```
+
 ### `window`
 Window-based process synchronization. Uses global clocks (obtained via
 the clock synchronization library) to align processes within a time
-window before each measurement. The window size is set with
-`--window-size=<microseconds>`.
+window before each measurement.
+
+Parameters:
+  - `--window-size=<us>` size of each measurement window in microseconds (default: 1000)
+  - `--wait-time=<us>` time in microseconds to wait before the first window starts (default: 1000)
+
+The clock synchronization algorithm is selected with the `MPITS_PARAMS` environment variable
+(see [mpi-time-sync](https://github.com/hunsa/mpi-time-sync/)); if it is not set, `HCA3O` is used.
+
+```
+export MPITS_PARAMS="--clock-sync=HCA3O --params=options:skampi_offset@5@20"
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=window --window-size=100 --wait-time=1000 --runtime-type=global
+```
+
+With `window`, the output contains an additional `errorcode` column for each repetition:
+`0` means the measurement is valid, `1` means a process reached the window after it had
+already started, `2` means the measurement did not finish within its window (`3` = both).
+Repetitions with a non-zero error code should be discarded; if many repetitions are invalid,
+increase `--window-size`.
 
 ### `roundtime`
 Round-time synchronization. Uses global clocks to synchronize processes
 based on measured round-trip times. Requires a clock synchronization
-method (configured via [mpi-time-sync](https://github.com/hunsa/mpi-time-sync/) options). The runtime type can be set to `global` or `local`.
+method (configured via [mpi-time-sync](https://github.com/hunsa/mpi-time-sync/) options,
+see `window` above). The runtime type can be set to `global` or `local`.
 
-Before each measurement, the root broadcasts a target start time derived from the
-measured Bcast run-time, and all processes busy-wait until that global time is reached.
+`roundtime` is a mix of time-based (clock-based) synchronization and barrier synchronization:
+
+- **Small messages: time-based.** Before each measurement, the root broadcasts a target start
+  time derived from the measured Bcast run-time, and all processes busy-wait until that global
+  time is reached. This gives a precise common start, which matters most when the operation
+  itself is short.
+- **Large messages: `MPI_Barrier`.** For message sizes at or above the threshold set with
+  `--rt-barrier-count`, processes are synchronized with `MPI_Barrier` instead. For long-running
+  operations, the overhead of the time-based scheme does not pay off, and the small skew left by
+  a barrier is negligible compared to the run-time.
+
+Once `roundtime` has switched to `MPI_Barrier`, it stays in barrier mode for the rest of the run.
+Message sizes are processed in the given order, so list them in increasing order (and do not use
+`--shuffle-jobs`) if smaller sizes should still use time-based synchronization.
+If `--rt-barrier-count` is not given, time-based synchronization is used for all message sizes.
 
 Parameters:
   - `--rt-bench-time-ms=<ms>` time limit in milliseconds for measurements of a given
     message size; once the elapsed time exceeds this limit, measurements for that
     message size are stopped
-  - `--rt-barrier-count=<bytes>` message size threshold in bytes above which the
-    synchronization switches from clock-based to `MPI_Barrier` (default: never switch)
+  - `--rt-barrier-count=<count>` message size threshold (as count of elements of the MPI
+    datatype, i.e., bytes when using `MPI_BYTE`/`MPI_CHAR`) at or above which the
+    synchronization switches from time-based to `MPI_Barrier` (default: never switch)
   - `--bcast-nrep=<n>` number of Bcast repetitions used to estimate the Bcast run-time
     (default: 10)
   - `--bcast-mult=<factor>` multiplier applied to the estimated Bcast run-time to compute
@@ -168,20 +219,42 @@ Parameters:
   - `--bcast-meas=<mean|median|max>` statistic used to summarize the measured Bcast
     run-times across processes (default: mean)
 
+Examples:
+```
+# basic round-time synchronization, spend at most 1 s per message size
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=roundtime --rt-bench-time-ms=1000 --runtime-type=global
+
+# tune the start-time estimation: 10 Bcasts, use the median, start 3x the Bcast time in the future
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=roundtime --rt-bench-time-ms=1000 \
+       --bcast-nrep=10 --bcast-meas=median --bcast-mult=3
+
+# time-based sync for 8, barrier for 1024 (switch at count >= 1000)
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=roundtime --rt-bench-time-ms=1000 --rt-barrier-count=1000
+```
+
 ### `None`
 No process synchronization. Processes start the measurement
 independently without any barrier or clock-based alignment.
+
+```
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=None
+```
 
 ### Timing procedure
 
 The MPI operation run-time is computed differently depending on the
 synchronization method:
 
-- With global clocks (`window`, `roundtime`): run-time is computed as
-  the difference between the largest exit time and the first start time
-  across all processes (`--runtime-type=global`).
-- With barrier-based synchronization: run-time is the largest local
-  run-time across all processes (`--runtime-type=local`).
+- `--runtime-type=local` (default, for all methods): run-time is the largest local
+  run-time across all processes.
+- `--runtime-type=global`: run-time is computed as the difference between the
+  largest exit time and the first start time across all processes, using global
+  clocks. This is the recommended setting for `window` and `roundtime`, and it
+  must be given explicitly.
 
 ## List of Compilation Flags
 
