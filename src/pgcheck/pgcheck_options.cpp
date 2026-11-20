@@ -146,8 +146,8 @@ int PGCheckOptions::parse(int argc, char *argv[], bool is_root) {
 
   // unique and sorted comparer list if list has multiple entries
   if (comparer_list.size() > 1) {
-    comparer_list.erase(std::unique(comparer_list.begin(), comparer_list.end()), comparer_list.end());
     std::sort(comparer_list.begin(), comparer_list.end());
+    comparer_list.erase(std::unique(comparer_list.begin(), comparer_list.end()), comparer_list.end());
   }
 
   if (is_root) {
@@ -159,9 +159,12 @@ int PGCheckOptions::parse(int argc, char *argv[], bool is_root) {
     fs::path out{output_directory};
     if (!fs::is_directory(out)) {
       if (allow_mkdir) {
-        bool okay = fs::create_directory(out);
-        if (!okay) {
-          Logger::ERROR("cannot create directory '" + output_directory + "'");
+        std::error_code ec;
+        fs::create_directories(out, ec);
+        if (ec || !fs::is_directory(out)) {
+          Logger::ERROR("cannot create directory '" + output_directory + "'"
+                        + (ec ? " (" + ec.message() + ")" : ""));
+          return CONSTANTS::FAILURE;
         }
       } else {
         Logger::ERROR("directory '" + output_directory + "' does not exists. (use -d to force creation of output dir)");

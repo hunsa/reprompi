@@ -114,18 +114,28 @@ MPI_Allreduce   --msizes-list=1024,4096,16384 --nrep=500 --proc-sync=roundtime -
 - `-v` | `--verbose` print all evaluations.
 - `-f` | `--input=<path>` input file containing the list of benchmarking jobs (tuples of MPI function, message size, number of repetitions).
 - `-o` | `--output=<path>` output folder for evaluations and raw data (required). Must exist, unless `-d` is given.
-- `-s` | `--csv` print evaluations as `.csv`-file to output folder.
-- `-m` | `--merge` merge tables of all tested MPI functions and print.
-- `-d` | `--allow-mkdir` create the output folder if needed, and a subfolder in it for every comparer.
+- `-s` | `--csv` additionally write every evaluation table as `.csv` file (next to the `.txt` file).
+- `-m` | `--merge` additionally merge the tables of all tested MPI functions into one table per comparer (`results.txt`). For the violation comparers (Violation, DetailedViolation, GroupedViolation), a summary with the number of violations and barrier warnings per collective is written to `stats.txt` and printed.
+- `-d` | `--allow-mkdir` create the output folder (including missing parent folders) if it does not exist.
 - `-t` | `--test` statistical test used for identification of violations against the performance guidelines. Possible values are: TTest(=0), WilcoxonRankSum(=1), and WilcoxonMannWhitney(=2). Default is WilcoxonMannWhitney.
 - `-c` | `--comp-list` a list of comparers separated by `,`. Possible values are: Simple(=0), AbsRuntime(=1), RelRuntime(=2), Violation(=3), DetailedViolation(=4), GroupedViolation(=5), Raw(=6). Default is GroupedViolation.
 
+### Output
+
+For every comparer, `pgchecker` creates a subfolder in the output folder (e.g., `grouped_violation/`, `raw/`)
+containing one table per collective (`<collective>.txt`, and `<collective>.csv` with `-s`).
+With `-m`, the merged table `results.txt` (and `stats.txt` for the violation comparers) is written to the same subfolder.
+The raw measurement data of every algorithm is stored as `data_<collective>_<algorithm>.dat` directly in the output folder.
+
 ### Comparer
+
+Columns of the table produced by each comparer:
+
 | **Comparer**     | **Raw** | **Absolute Runtime** | **Relative Runtime** | **Violation** | **Detailed Violation** | **Grouped Violation** | **Simple** |
 |------------------|:-------:|:--------------------:|:--------------------:|:-------------:|:----------------------:|:---------------------:|:----------:|
 | Runtime          |  **x**  |                      |                      |               |                        |                       |            |
-| Default Mean     |         |                      |                      |     **x**     |          **x**         |                       |    **x**   |
-| Mockup Mean      |         |                      |                      |     **x**     |          **x**         |                       |    **x**   |
+| Default Mean     |         |         **x**        |                      |     **x**     |          **x**         |         **x**         |    **x**   |
+| Mockup Mean      |         |         **x**        |                      |     **x**     |          **x**         |         **x**         |    **x**   |
 | Default Median   |         |         **x**        |                      |     **x**     |          **x**         |         **x**         |            |
 | Mockup Median    |         |         **x**        |                      |     **x**     |          **x**         |         **x**         |            |
 | Default / Mockup |         |                      |         **x**        |               |          **x**         |         **x**         |            |
@@ -133,9 +143,11 @@ MPI_Allreduce   --msizes-list=1024,4096,16384 --nrep=500 --proc-sync=roundtime -
 | z-Value          |         |                      |                      |     **x**     |          **x**         |                       |            |
 | critical-Value   |         |                      |                      |     **x**     |          **x**         |                       |            |
 | Violation        |         |                      |                      |     **x**     |          **x**         |         **x**         |            |
-| Barrier Warning  |         |                      |                      |     **x**     |          **x**         |         **x**         |            |
+| Barrier Warning  |         |                      |                      |               |          **x**         |                       |            |
 | Fastest Mockup   |         |                      |                      |               |                        |         **x**         |            |
-| Count Violations |         |                      |                      |     **x**     |          **x**         |         **x**         |            |
+
+With `-m`, the violation comparers (Violation, Detailed Violation, Grouped Violation) additionally write
+`stats.txt`, which counts the violations and barrier warnings per collective.
 ### Statistical Tests
 
 | **Test**                  | **Mean** |  **Median**  |  **Bounded Ranks**  |
