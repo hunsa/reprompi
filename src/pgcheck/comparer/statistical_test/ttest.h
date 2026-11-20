@@ -30,11 +30,11 @@ class TTest : public TwoSampleTest {
  public:
   TTest() = default;
   /**
-   * @return critical t-value for degrees of freedom
+   * @return critical t-value for the Welch-Satterthwaite degrees of freedom
    */
   double get_critical_value() override;
   /**
-   * @return t-test-value for samples
+   * @return Welch's t-test value for samples (unequal variances)
    */
   double get_z_value() override;
   /**
