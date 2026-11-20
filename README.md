@@ -205,6 +205,12 @@ Message sizes are processed in the given order, so list them in increasing order
 `--shuffle-jobs`) if smaller sizes should still use time-based synchronization.
 If `--rt-barrier-count` is not given, time-based synchronization is used for all message sizes.
 
+The time limit `--rt-bench-time-ms` applies in both modes. Hence, `--rt-barrier-count=0` uses
+`MPI_Barrier` for all message sizes, but still stops measuring a message size once its time budget
+is used up, even if `--nrep` repetitions have not been reached. This is barrier synchronization
+with a time limit per message size, which `--proc-sync=MPI_Barrier` does not provide.
+This is the recommended setting for `pgchecker`.
+
 Parameters:
   - `--rt-bench-time-ms=<ms>` time limit in milliseconds for measurements of a given
     message size; once the elapsed time exceeds this limit, measurements for that
@@ -233,6 +239,10 @@ mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,102
 # time-based sync for 8, barrier for 1024 (switch at count >= 1000)
 mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
        --proc-sync=roundtime --rt-bench-time-ms=1000 --rt-barrier-count=1000
+
+# MPI_Barrier for all message sizes, at most 1 s per message size
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast --msizes-list=8,1024 --nrep=100 \
+       --proc-sync=roundtime --rt-bench-time-ms=1000 --rt-barrier-count=0
 ```
 
 ### `None`

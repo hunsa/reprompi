@@ -87,6 +87,13 @@ cat ./examples/pgcheck/input.txt
 MPI_Allreduce --msizes-list=8,80,800,8000,80000 --nrep=5000 --proc-sync=roundtime --rt-bench-time-ms=3000 --rt-barrier-count=0
 ```
 
+With `--proc-sync=roundtime --rt-barrier-count=0`, processes are synchronized with `MPI_Barrier` for all
+message sizes, and each message size is measured for at most `--rt-bench-time-ms` milliseconds
+(here: 3 s), even if `--nrep` repetitions have not been reached. Since `pgchecker` measures every
+algorithm variant of a collective for every message size, this keeps the total run time bounded.
+This is the recommended setting for `pgchecker`; see the `roundtime` section in the
+[ReproMPI README](../../README.md) for details.
+
 
 
 ## Running the PGChecker
