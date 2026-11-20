@@ -64,7 +64,6 @@ add_executable(pgchecker
         pgdata_comparer.cpp
         pgdata_printer.cpp
         comparer/statistical_test/ttest.cpp
-        comparer/statistical_test/wilcoxon_rank_sum.cpp
         comparer/statistical_test/wilcoxon_mann_whitney.cpp
         comparer/statistical_test/two_sample_test_factory.cpp
         comparer/statistical_test/two_sample_test.cpp

@@ -88,6 +88,14 @@ int PGCheckOptions::parse(int argc, char *argv[], bool is_root) {
         break;
       case 't':
         test_type = std::atoi(optarg);
+        if (test_type != TwoSampleTestFactory::TwoSampleTestType::TTEST &&
+            test_type != TwoSampleTestFactory::TwoSampleTestType::WILCOXON_MANN_WHITNEY) {
+          if (is_root) {
+            std::cerr << "Error: invalid test type '" << optarg
+                      << "', possible values are 0 (T-Test) and 1 (Wilcoxon-Mann-Whitney)" << std::endl;
+          }
+          return CONSTANTS::FAILURE;
+        }
         break;
       case 'o':
         output_directory = std::string(optarg);
@@ -191,11 +199,10 @@ std::string PGCheckOptions::get_usage_string() {
         << "5=Grouped Violation-Test (default) | "
         << "6=Raw Data."
         << std::endl;
-  usage << std::setw(36) << std::left << "  -t, --test {0|1|2}"
+  usage << std::setw(36) << std::left << "  -t, --test {0|1}"
         << "Specify the test type: "
         << "0=T-Test | "
-        << "1=Wilcoxon-Rank-Sum-Test | "
-        << "2=Wilcoxon-Mann-Whitney (default)."
+        << "1=Wilcoxon-Mann-Whitney (default)."
         << std::endl;
   usage << std::setw(36) << std::left << "  -o, --output <path>" << "Specify an existing output folder."
         << std::endl;

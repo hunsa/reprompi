@@ -26,15 +26,13 @@
 
 #include "two_sample_test.h"
 #include "ttest.h"
-#include "wilcoxon_rank_sum.h"
 #include "wilcoxon_mann_whitney.h"
 
 class TwoSampleTestFactory {
  public:
   enum TwoSampleTestType {
-    TTEST,
-    WILCOXON_RANK_SUM,
-    WILCOXON_MANN_WHITNEY
+    TTEST = 0,
+    WILCOXON_MANN_WHITNEY = 1
   };
 
   static constexpr auto DEFAULT_TWO_SAMPLE_TEST = TwoSampleTestType::WILCOXON_MANN_WHITNEY;

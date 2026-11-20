@@ -29,9 +29,6 @@ TwoSampleTest *TwoSampleTestFactory::create_two_sample_test(int test_id) {
     case TwoSampleTestType::TTEST:
       two_sample_test = new TTest();
       break;
-    case TwoSampleTestType::WILCOXON_RANK_SUM:
-      two_sample_test = new WilcoxonRankSum();
-      break;
     default:
     case TwoSampleTestType::WILCOXON_MANN_WHITNEY:
       two_sample_test = new WilcoxonMannWhitney();
