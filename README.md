@@ -19,7 +19,7 @@ run-time of **MPI blocking collective** operations such as `MPI_Bcast`,
 5. Sascha Hunold, Alexandra Carpen-Amarie:
    Autotuning MPI Collectives using Performance Guidelines. HPC Asia 2018: 64-74. https://doi.org/10.1145/3149457.3149461
 6. Joseph Schuchart, Sascha Hunold, George Bosilca:
-   Synchronizing MPI Processes in Space and Time. EuroMPI 2023: 7:1-7:11. https://doi.org/https://doi.org/10.1145/3615318.3615325
+   Synchronizing MPI Processes in Space and Time. EuroMPI 2023: 7:1-7:11. https://doi.org/10.1145/3615318.3615325
 ## Components
 
 - `mpibenchmark`: actual MPI benchmark for collectives

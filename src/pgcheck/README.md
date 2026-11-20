@@ -9,8 +9,10 @@ It provides multiple comparators that perform different evaluation of the raw ru
 
 # References 
 
-- Sascha Hunold:
-  Verifying Performance Guidelines for MPI Collectives at Scale. SC Workshops 2023: 1264-1268
+1. Sascha Hunold:
+   Verifying Performance Guidelines for MPI Collectives at Scale. SC Workshops 2023: 1264-1268. https://doi.org/10.1145/3624062.3625532
+2. Sascha Hunold, Jesper Larsson Träff, Ruben Laso:
+   Tuned your MPI library? Now check the performance guidelines. Parallel Comput. 129: 103205 (2026). https://doi.org/10.1016/j.parco.2026.103205
 
 ## Installation
 
