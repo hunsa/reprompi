@@ -40,7 +40,6 @@
 //#include "reprompi_bench/sync/clock_sync/synchronization.h"
 //#include "reprompi_bench/sync/clock_sync/utils/communicator_utils.h"
 #include "reprompi_bench/sync/process_sync/process_synchronization.h"
-#include "reprompi_bench/sync/time_measurement.h"
 #include "benchmark_job.h"
 #include "reprompi_bench/option_parser/option_parser_helpers.h"
 #include "reprompi_bench/option_parser/parse_options.h"

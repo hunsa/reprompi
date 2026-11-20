@@ -21,7 +21,7 @@ REPOS["pgmpitunelib"]["BUILD_CMD"] = f"cmake -DCMAKE_BUILD_TYPE=Release -B {REPO
 
 # pgchecker
 PG_SOURCE_DIR  = os.path.join(os.path.dirname(__file__), "..")
-PG_BUILD_CMD  = f"cmake -DCMAKE_BUILD_TYPE=Release -S {PG_SOURCE_DIR} -B {PG_BUILD_DIR} -DOPTION_ENABLE_PGCHECKER=ON -DPGTUNELIB_PATH={REPOS['pgmpitunelib']['INSTALL_DIR']} -DCMAKE_INSTALL_PREFIX={PG_INSTALL_DIR}; cmake --build {PG_BUILD_DIR} --parallel; cmake --install {PG_BUILD_DIR}"
+PG_BUILD_CMD  = f"cmake -DCMAKE_BUILD_TYPE=Release -S {PG_SOURCE_DIR} -B {PG_BUILD_DIR} -DENABLE_PGCHECKER=ON -DPGTUNELIB_PATH={REPOS['pgmpitunelib']['INSTALL_DIR']} -DCMAKE_INSTALL_PREFIX={PG_INSTALL_DIR}; cmake --build {PG_BUILD_DIR} --parallel; cmake --install {PG_BUILD_DIR}"
 
 PG_EXP_CONFIG_DIR = "config"
 PG_EXP_DATA_DIR   = "data"

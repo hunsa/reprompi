@@ -16,11 +16,13 @@ It provides multiple comparators that perform different evaluation of the raw ru
 
 `pgchecker` depends on [`pgmpitunelib`](https://github.com/hunsa/pgmpitunelib).
 
+Prerequisites: an MPI library (`mpicc`/`mpicxx` must be in your `PATH`), the GSL library, and CMake (version >= 3.22).
+
 Therefore, the steps to build `pgchecker` are:
 1. Build and install `pgmpitunelib`
 2. Build `pgchecker` on top of `pgmpitunelib`
 
-Let us assume, we are in directory `~/tmp/reprobeta`, where we will install everything.
+Let us assume that we work in the directory `~/tmp/reprobeta`, where we will install everything.
 
 1. Install `pgmpitunelib`
 ```bash
@@ -35,22 +37,24 @@ Now, `pgmpitunelib` should be installed in `$HOME/tmp/reprobeta/build`.
 
 2. Install `pgchecker`
 ```bash
+cd ~/tmp/reprobeta
 git clone https://github.com/hunsa/reprompi.git
 cd reprompi
-cmake -DOPTION_ENABLE_PGCHECKER=ON -DPGTUNELIB_PATH=$HOME/tmp/reprobeta/build -B build
+cmake -DENABLE_PGCHECKER=ON -DPGTUNELIB_PATH=$HOME/tmp/reprobeta/build -B build
 cmake --build ./build/ -v
 ```
-Now, `pgchecker` is available in `build\bin`.
+Now, `pgchecker` is available in `build/bin`.
 
 3. Configure `pgchecker`
-All available collectives are part of `pgmpitunelib`, which contains an executable `pgmpi_info` which print all collectives in CSV format.
+
+All available collectives are part of `pgmpitunelib`, which contains an executable `pgmpi_info` that prints all collectives in CSV format.
 
 We will create a CSV with all these collectives like so:
 ```bash
 $HOME/tmp/reprobeta/build/bin/pgmpi_info > collectives.csv
 ```
 The file should look like this:
-``bash
+```bash
 head -5 collectives.csv
 cliname;mpiname;algname;rooted
 allgather;MPI_Allgather;default;0
@@ -58,11 +62,11 @@ allgather;MPI_Allgather;allgather_as_allgatherv;0
 allgather;MPI_Allgather;allgather_as_allreduce;0
 allgather;MPI_Allgather;allgather_as_alltoall;0
 ```
-You can edit this file, e.g., you can remove lines that should no be tested. Otherwise, the file can just be used as is:
+You can edit this file, e.g., you can remove lines that should not be tested. Otherwise, the file can just be used as is:
 ```bash
 PGCHECKER_CSV=./collectives.csv srun --mpi=pmi2 -N32 --ntasks-per-node=32 ./build/bin/pgchecker -o ./foo -d -f ./examples/pgcheck/input.txt 
 ```
-The `input.txt` what and how to test each collective version, which defines all parameters that `reprompi` should use to run each collective. So, this file has the format
+The file `input.txt` specifies what to test and how: for each collective, it defines all parameters that `reprompi` should use to run it. So, this file has the format
 ```bash
 collective_name reprompi_parameters
 ```
