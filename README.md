@@ -37,10 +37,13 @@ Prerequisites for installing the ReproMPI benchmark:
 ## Basic installation
 
 ```
-  git clone https://github.com/hunsa/reprompi-dev
-  cd reprompi-dev
+  git clone https://github.com/hunsa/reprompi.git
+  cd reprompi
   cmake -B build
+  cmake --build build
 ```
+
+The `mpibenchmark` executable is then available in `build/bin`.
 
 For specific configuration options check the *Benchmark Configuration* section.
 
@@ -55,7 +58,7 @@ the *number of measurement repetitions* for each test, as in the
 following example.
 
 ```
-mpirun -np 4 ./bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather 
+mpirun -np 4 ./build/bin/mpibenchmark --calls-list=MPI_Bcast,MPI_Allgather \
              --msizes-list=8,1024,2048  --nrep=10
 ```
 

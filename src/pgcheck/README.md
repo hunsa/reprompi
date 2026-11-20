@@ -62,9 +62,17 @@ allgather;MPI_Allgather;allgather_as_allgatherv;0
 allgather;MPI_Allgather;allgather_as_allreduce;0
 allgather;MPI_Allgather;allgather_as_alltoall;0
 ```
-You can edit this file, e.g., you can remove lines that should not be tested. Otherwise, the file can just be used as is:
+You can edit this file, e.g., you can remove lines that should not be tested. Otherwise, the file can just be used as is.
+`pgchecker` reads this file from the path given in the environment variable `PGCHECKER_CSV`.
+If `PGCHECKER_CSV` is not set, `pgchecker` looks for a file `pgmpi_conf.csv` in the current working directory and aborts if it does not exist.
+
+For example, on a Slurm cluster:
 ```bash
 PGCHECKER_CSV=./collectives.csv srun --mpi=pmi2 -N32 --ntasks-per-node=32 ./build/bin/pgchecker -o ./foo -d -f ./examples/pgcheck/input.txt 
+```
+or locally with `mpirun`:
+```bash
+PGCHECKER_CSV=./collectives.csv mpirun -np 4 ./build/bin/pgchecker -o ./foo -d -f ./examples/pgcheck/input.txt
 ```
 The file `input.txt` specifies what to test and how: for each collective, it defines all parameters that `reprompi` should use to run it. So, this file has the format
 ```bash
@@ -81,10 +89,11 @@ MPI_Allreduce --msizes-list=8,80,800,8000,80000 --nrep=5000 --proc-sync=roundtim
 
 ## Running the PGChecker
 
-In the simplest use case, PGChecker can simply be given an input file listing all collective operations to be tested.
+In the simplest use case, PGChecker is given an input file listing all collective operations to be tested and an output directory (`-o`, required).
+The output directory must already exist, unless `-d` is given.
 
 ```
-mpirun -np 4 ./bin/pgchecker -f input.txt
+PGCHECKER_CSV=./collectives.csv mpirun -np 4 ./build/bin/pgchecker -f input.txt -o ./results -d
 ```
 
 The input file contains a list of operations to be tested. In each line of the file the collective function to be tested, a (list of) message sizes and the *number of measurement repetitions* for each test are specified, as in the following example.
@@ -102,12 +111,12 @@ MPI_Allreduce   --msizes-list=1024,4096,16384 --nrep=500 --proc-sync=roundtime -
 - `-h` | `--help` print help.
 - `-v` | `--verbose` print all evaluations.
 - `-f` | `--input=<path>` input file containing the list of benchmarking jobs (tuples of MPI function, message size, number of repetitions).
-- `-o` | `--output` print evaluations to output folder.
+- `-o` | `--output=<path>` output folder for evaluations and raw data (required). Must exist, unless `-d` is given.
 - `-s` | `--csv` print evaluations as `.csv`-file to output folder.
 - `-m` | `--merge` merge tables of all tested MPI functions and print.
-- `-d` | `--allow-mkdir` create folder in the output folder for every comparer.
-- `-t` | `--test` statistical test used for identification of violations against the performance guidelines. Possible values are: TTest(=0), WilcoxonRankSum(=1), and WilcoxonMannWhitney(=2). Default is TTest.
-- `-c` | `--comp-list` a list of comparer seperated by `,`. Possible values are: Simple(=0), AbsRuntime(=1), RelRuntime(=2), Violation(=3), DetailedViolation(=4), GroupedViolation(=5), Raw(=6). Default is Raw.
+- `-d` | `--allow-mkdir` create the output folder if needed, and a subfolder in it for every comparer.
+- `-t` | `--test` statistical test used for identification of violations against the performance guidelines. Possible values are: TTest(=0), WilcoxonRankSum(=1), and WilcoxonMannWhitney(=2). Default is WilcoxonMannWhitney.
+- `-c` | `--comp-list` a list of comparers separated by `,`. Possible values are: Simple(=0), AbsRuntime(=1), RelRuntime(=2), Violation(=3), DetailedViolation(=4), GroupedViolation(=5), Raw(=6). Default is GroupedViolation.
 
 ### Comparer
 | **Comparer**     | **Raw** | **Absolute Runtime** | **Relative Runtime** | **Violation** | **Detailed Violation** | **Grouped Violation** | **Simple** |
