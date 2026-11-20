@@ -124,7 +124,7 @@ MPI_Allreduce   --msizes-list=1024,4096,16384 --nrep=500 --proc-sync=roundtime -
 - `-s` | `--csv` additionally write every evaluation table as `.csv` file (next to the `.txt` file).
 - `-m` | `--merge` additionally merge the tables of all tested MPI functions into one table per comparer (`results.txt`). For the violation comparers (Violation, DetailedViolation, GroupedViolation), a summary with the number of violations and barrier warnings per collective is written to `stats.txt` and printed.
 - `-d` | `--allow-mkdir` create the output folder (including missing parent folders) if it does not exist.
-- `-t` | `--test` statistical test used for identification of violations against the performance guidelines. Possible values are: TTest(=0), WilcoxonRankSum(=1), and WilcoxonMannWhitney(=2). Default is WilcoxonMannWhitney.
+- `-t` | `--test` statistical test used for identification of violations against the performance guidelines. Possible values are: TTest(=0, Welch's t-test) and WilcoxonMannWhitney(=1). Default is WilcoxonMannWhitney.
 - `-c` | `--comp-list` a list of comparers separated by `,`. Possible values are: Simple(=0), AbsRuntime(=1), RelRuntime(=2), Violation(=3), DetailedViolation(=4), GroupedViolation(=5), Raw(=6). Default is GroupedViolation.
 
 ### Output
@@ -157,10 +157,13 @@ With `-m`, the violation comparers (Violation, Detailed Violation, Grouped Viola
 `stats.txt`, which counts the violations and barrier warnings per collective.
 ### Statistical Tests
 
-| **Test**                  | **Mean** |  **Median**  |  **Bounded Ranks**  |
-|---------------------------|:--------:|:------------:|:-------------------:|
-| **T-Test**                |  **x**   |              |                     |
-| **Wilcoxon Rank-Sum**     |          |    **x**     |                     |
-| **Wilcoxon-Mann-Whitney** |          |    **x**     |        **x**        |
+| **Test**                           | **Mean** |  **Median**  |  **Tied Ranks**  |
+|------------------------------------|:--------:|:------------:|:----------------:|
+| **Welch's T-Test** (`-t 0`)        |  **x**   |              |                  |
+| **Wilcoxon-Mann-Whitney** (`-t 1`) |          |    **x**     |      **x**       |
+
+The Wilcoxon-Mann-Whitney test (also known as Wilcoxon rank-sum test or Mann-Whitney U test) assigns tied
+run-times the average of their ranks and applies the tie correction to the variance of the test statistic.
+This matters in practice, as limited timer resolution often leads to many identical run-times.
 
 
