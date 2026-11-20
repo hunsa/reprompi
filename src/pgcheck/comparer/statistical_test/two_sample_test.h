@@ -59,9 +59,14 @@ class TwoSampleTest {
   virtual double get_z_value() = 0;
   virtual bool get_violation() = 0;
   /**
-   * @return critical value at index; normal distribution value if sample size >= 25
+   * one-sided critical value of the standard normal distribution (alpha = 0.05)
    */
-  double get_critical_value(int sample_size);
+  static constexpr double NORMAL_CRITICAL_VALUE = 1.644854;
+  /**
+   * @return one-sided critical t-value (alpha = 0.05) for the given degrees of freedom;
+   *         normal distribution value if degrees of freedom >= 25
+   */
+  double get_critical_value(int degrees_of_freedom);
   void set_samples(const std::vector<double> &def, const std::vector<double> &alt);
 };
 

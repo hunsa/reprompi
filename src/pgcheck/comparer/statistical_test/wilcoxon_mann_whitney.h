@@ -41,14 +41,13 @@ struct rank_element {
 
 class WilcoxonMannWhitney : public TwoSampleTest {
  private:
-  std::vector <std::pair<double, bool>> get_ordered_diff_sign_vector();
-  double get_shared_rank_deviation(int shared_rank_count);
+  double get_shared_rank_deviation(std::size_t shared_rank_count);
   double get_expected_value();
 
  public:
   WilcoxonMannWhitney() = default;
   /**
-   * @return critical z-value for min sample size
+   * @return one-sided critical value of the standard normal distribution (alpha = 0.05)
    */
   double get_critical_value() override;
   /**

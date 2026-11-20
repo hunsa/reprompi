@@ -44,13 +44,16 @@ double WilcoxonMannWhitney::get_z_value() {
   std::sort(ranks.begin(), ranks.end());
 
   // assign 1-based ranks; tied runtimes share the average of their ranks
+  // and accumulate sum(t^3 - t) over all groups of t tied runtimes for the variance correction
   const size_t N = ranks.size();
+  double tie_sum = 0;
   size_t i = 0;
   while (i < N) {
     size_t j = i;
     while (j + 1 < N && ranks[j + 1].runtime == ranks[i].runtime) {
       ++j;
     }
+    tie_sum += get_shared_rank_deviation(j - i + 1);
     double mean_rank = (i + 1 + j + 1) / 2.0;
     for (size_t k = i; k <= j; ++k) {
       if (ranks[k].sample_id == 1) {
@@ -69,18 +72,30 @@ double WilcoxonMannWhitney::get_z_value() {
   double U = size_squared + n * (n + 1) / 2 - sample_1_rank_sum;
   assert((U + size_squared + m * (m + 1) / 2 - sample_2_rank_sum) == size_squared);
 
-  double standard_deviation = std::sqrt(size_squared * (size_sum + 1) / 12);
-  z_value = (U - get_expected_value()) / standard_deviation;
+  // standard deviation of U with tie correction:
+  // sigma^2 = n*m/12 * ((N+1) - sum(t^3 - t) / (N*(N-1)))
+  double variance = 0;
+  if (size_sum > 1) {
+    variance = size_squared / 12 * ((size_sum + 1) - tie_sum / (size_sum * (size_sum - 1)));
+  }
+  if (variance <= 0) {
+    // all runtimes are identical (or not enough samples): no evidence for a difference
+    z_value = 0;
+    return z_value;
+  }
+  z_value = (U - get_expected_value()) / std::sqrt(variance);
   return z_value;
 }
 
 double WilcoxonMannWhitney::get_critical_value() {
-  int size = std::min(sample_1.size(), sample_2.size());
-  return TwoSampleTest::get_critical_value(size);
+  // the z-value of the Mann-Whitney U statistic is compared against the standard normal distribution
+  return NORMAL_CRITICAL_VALUE;
 }
 
-double WilcoxonMannWhitney::get_shared_rank_deviation(int shared_rank_count) {
-  return (std::pow(shared_rank_count, 3) - shared_rank_count) / 2;
+double WilcoxonMannWhitney::get_shared_rank_deviation(std::size_t shared_rank_count) {
+  // t^3 - t for a group of t tied runtimes (0 if t == 1)
+  double t = static_cast<double>(shared_rank_count);
+  return t * t * t - t;
 }
 
 double WilcoxonMannWhitney::get_expected_value() {
